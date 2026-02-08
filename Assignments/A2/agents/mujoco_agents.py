@@ -1,16 +1,14 @@
 import itertools
 import torch
-import random
 from torch import nn
+import random
 from torch import optim
 import numpy as np
 from tqdm import tqdm
 import torch.distributions as distributions
 
 import os
-import torch
 import numpy as np
-from torch import nn
 from utils.replay_buffer import ReplayBuffer
 from agents.base_agent import BaseAgent
 import utils.pytorch_util as ptu
@@ -44,13 +42,20 @@ class ImitationAgent(BaseAgent):
         self.replay_buffer = ReplayBuffer(5000) #you can set the max size of replay buffer if you want
         
 
-        #initialize your model and optimizer and other variables you may need
-        self.optimizer = None 
+        # initialize your model and optimizer and other variables you may need
+        self.model=ptu.build_mlp(input_size=self.observation_dim,
+                                 output_size=self.action_dim,
+                                 n_layers=self.hyperparameters['n_layers'],
+                                 size=self.hyperparameters['size'],
+                                 )
+        self.optimizer=optim.Adam(self.model.parameters(),
+                                  lr=self.hyperparameters['lr'])
+        self.loss=nn.MSELoss()
 
 
     def forward(self, observation: torch.FloatTensor):
         #*********YOUR CODE HERE******************
-        action = None #change this to your action
+        action= # change this to your action
         return action
 
 

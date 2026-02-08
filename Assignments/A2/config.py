@@ -15,6 +15,9 @@ configs = {
                 "num_iteration":250,
                 "max_length":1000,
                 "num_trajs":10,
+                "n_layers":2,
+                "size":64,
+                "lr":1e-3
             },
             "num_iteration": 250,
             "episode_len": 1000

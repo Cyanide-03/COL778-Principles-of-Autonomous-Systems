@@ -24,7 +24,7 @@ def setup_agent(args, configs):
     return
 
 def train_agent(args, configs):
-    logger     = Logger(args.logdir)
+    logger= Logger(args.logdir)
     max_ep_len = configs.get("episode_len", None) or env.spec.max_episode_steps
     # set random seeds
     
