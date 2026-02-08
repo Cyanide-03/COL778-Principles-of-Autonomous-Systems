@@ -13,7 +13,8 @@ from utils.replay_buffer import ReplayBuffer
 from agents.base_agent import BaseAgent
 import utils.pytorch_util as ptu
 from policies.experts import load_expert_policy
-import utils.utils as utils
+# import utils.utils as utils
+from utils.utils import *
 
 
 class ImitationAgent(BaseAgent):
@@ -55,24 +56,28 @@ class ImitationAgent(BaseAgent):
 
     def forward(self, observation: torch.FloatTensor):
         #*********YOUR CODE HERE******************
-        action= # change this to your action
+        action=self.model(observation) # change this to your action
         return action
 
 
     @torch.no_grad()
     def get_action(self, observation: torch.FloatTensor):
-        #*********YOUR CODE HERE******************
-        
-        action = None #change this to your action
+        if observation.dim() == 1:
+            observation = observation.unsqueeze(0)
+        action = self.model(observation)
         return action 
 
     
-    
     def update(self, observations, actions):
         #*********YOUR CODE HERE******************
-        
-        pass
+        pred_actions=self.model(observations)
+        loss=self.loss(pred_actions,actions)
 
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return loss.item()
 
     def train_iteration(self, env, envsteps_so_far, render=False, itr_num=None, **kwargs):
         '''
@@ -94,9 +99,24 @@ class ImitationAgent(BaseAgent):
             # self.replay_buffer.sample_batch(batch_size, required=<list of required keys>)
 
         # *** YOUR CODE HERE ******
+        max_episode_length=self.hyperparameters['max_length']
+        num_trajs=self.hyperparameters['num_trajs']
+        batch_size=self.hyperparameters['batch_size']
+        total_loss=[]
+        num_updates=10 # ! asked on piazza
+
+        # first we will get some data to train our neural network
+        # here data will be trajectories/episodes
+        # ! we might have to use policy blending here befroe sampling trajectories
+        trajs,envstep_this_batch=sample_trajectories(env,self.expert_policy,num_trajs*max_episode_length,max_episode_length,render)
+        self.replay_buffer.add_rollouts(trajs) # we will add these trajs into replay buffer to sample from them later
+        for i in range(num_updates):
+            s_a_pairs=self.replay_buffer.sample_batch(batch_size,required=['obs','acs'])
+            loss=self.update(s_a_pairs['obs'],s_a_pairs['acs'])
+            total_loss.append(loss)
 
         return {
-            'episode_loss': None,
-            'trajectories': None,
-            'current_train_envsteps': None
+            'episode_loss': float(np.mean(total_loss)),
+            'trajectories': trajs,
+            'current_train_envsteps': envstep_this_batch
         }

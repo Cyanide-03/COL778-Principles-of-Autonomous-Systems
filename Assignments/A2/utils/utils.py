@@ -78,7 +78,9 @@ def sample_trajectories(
     """Collect rollouts using policy until we have collected min_timesteps_per_batch steps."""
     timesteps_this_batch = 0
     trajs = []
-    while timesteps_this_batch < min_timesteps_per_batch:
+    while timesteps_this_batch < min_timesteps_per_batch: # this loop will keep calling sample trajectory until 
+                                                          # we have a total of 15000 (s,a) pairs
+                                                          # because it might happen that some episodes end earlier while some do not
         # collect rollout
         traj = sample_trajectory(env, policy, max_length, render)
         trajs.append(traj)

@@ -13,8 +13,8 @@ configs = {
               "hyperparameters": {
                 'batch_size': 512,
                 "num_iteration":250,
-                "max_length":1000,
-                "num_trajs":10,
+                "max_length":1000, # max episode length (episode is one rollout)
+                "num_trajs":10, # (number of episodes for each iteration)
                 "n_layers":2,
                 "size":64,
                 "lr":1e-3
@@ -31,6 +31,9 @@ configs = {
                 "num_iteration":500,
                 "max_length":1000,
                 "num_trajs":10,
+                "n_layers":2,
+                "size":64,
+                "lr":1e-3
             },
             "num_iteration": 500,
             "episode_len": 1000
