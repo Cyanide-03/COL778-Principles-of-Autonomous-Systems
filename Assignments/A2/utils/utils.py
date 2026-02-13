@@ -12,38 +12,126 @@ from typing import Dict, Tuple, List
 ############################################
 
 
+# def sample_trajectory(
+#     env: gym.Env, policy: BaseAgent, max_length: int, render: bool = False
+# ) -> Dict[str, np.ndarray]:
+#     """Sample a rollout in the environment from a policy."""
+#     ob = env.reset()
+#     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
+#     steps = 0
+
+#     while True:
+#         # render an image
+#         if render:
+#             # breakpoint()
+#             if hasattr(env, "sim"):
+#                 img = env.sim.render(camera_name="track", height=500, width=500)[::-1]
+#             else:
+#                 # img = env.render(mode='single_rgb_array') # !!!
+#                 img = env.render() 
+#             image_obs.append(
+#                 cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
+#             )
+
+#         #use the most recent ob to decide what to do
+#         in_ = torch.tensor(ob).to(ptu.device,torch.float)
+#         in_ = in_.unsqueeze(0)
+#         ac = policy(in_).detach().cpu().numpy() # HINT: this is a numpy array
+#         ac = ac[0]
+
+#         # Take that action and get reward and next ob
+#         next_ob, rew, terminated, _ = env.step(ac)
+        
+#         # Rollout can end due to done, or due to max_path_length
+#         steps += 1
+#         rollout_done = (terminated) or (steps >= max_length) # HINT: this is either 0 or 1
+
+#         # record result of taking that action
+#         obs.append(ob)
+#         acs.append(ac)
+#         rewards.append(rew)
+#         next_obs.append(next_ob)
+#         terminals.append(rollout_done)
+
+#         ob = next_ob  # jump to next timestep
+
+#         # end the rollout if the rollout ended
+#         if rollout_done:
+#             break
+
+#     return {
+#         "observation": np.array(obs, dtype=np.float32),
+#         "image_obs": np.array(image_obs, dtype=np.uint8),
+#         "reward": np.array(rewards, dtype=np.float32),
+#         "action": np.array(acs, dtype=np.float32),
+#         "next_observation": np.array(next_obs, dtype=np.float32),
+#         "terminal": np.array(terminals, dtype=np.float32),
+#     }
+
+
 def sample_trajectory(
     env: gym.Env, policy: BaseAgent, max_length: int, render: bool = False
 ) -> Dict[str, np.ndarray]:
     """Sample a rollout in the environment from a policy."""
     ob = env.reset()
+    
+    # FIX 1: Handle Gym v0.26+ where reset() returns (obs, info)
+    if isinstance(ob, tuple):
+        ob = ob[0]
+
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
 
     while True:
         # render an image
+        # render an image
+        # render an image
         if render:
-            # breakpoint()
-            if hasattr(env, "sim"):
-                img = env.sim.render(camera_name="track", height=500, width=500)[::-1]
-            else:
-                img = env.render(mode='single_rgb_array')
-            image_obs.append(
-                cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
-            )
+            try:
+                if hasattr(env, "sim"):
+                    img = env.sim.render(camera_name="track", height=500, width=500)[::-1]
+                else:
+                    img = env.render()
+                
+                # FIX: Handle when render returns a list
+                if isinstance(img, list) and len(img) > 0:
+                    img = img[0]  # Take the first camera view
+                
+                # Validate that img is actually a numpy array
+                if img is not None and isinstance(img, np.ndarray) and img.size > 0:
+                    image_obs.append(
+                        cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
+                    )
+                else:
+                    print(f"WARNING: Render returned invalid data: {type(img)}")
+                    # Fallback: black frame
+                    image_obs.append(np.zeros((250, 250, 3), dtype=np.uint8))
+            except Exception as e:
+                # If any rendering error, use black frame
+                print(f"Rendering error: {e}")
+                image_obs.append(np.zeros((250, 250, 3), dtype=np.uint8))
 
-        #use the most recent ob to decide what to do
-        in_ = torch.tensor(ob).to(ptu.device,torch.float)
+            # else:
+            #     # If rendering failed completely, append a black frame to prevent crash
+            #     image_obs.append(np.zeros((250, 250, 3), dtype=np.uint8))
+
+        # use the most recent ob to decide what to do
+        in_ = torch.tensor(ob).to(ptu.device, torch.float)
         in_ = in_.unsqueeze(0)
-        ac = policy(in_).detach().cpu().numpy() # HINT: this is a numpy array
+        ac = policy(in_).detach().cpu().numpy()
         ac = ac[0]
 
         # Take that action and get reward and next ob
-        next_ob, rew, terminated, _ = env.step(ac)
+        step_result = env.step(ac)
         
-        # Rollout can end due to done, or due to max_path_length
-        steps += 1
-        rollout_done = (terminated) or (steps >= max_length) # HINT: this is either 0 or 1
+        # FIX 4: Handle Gym v0.26+ step() returning 5 values (obs, reward, term, trunc, info)
+        if len(step_result) == 5:
+            next_ob, rew, terminated, truncated, _ = step_result
+            rollout_done = (terminated or truncated) or (steps >= max_length)
+        else:
+            # Handle Old Gym step() returning 4 values (obs, reward, done, info)
+            next_ob, rew, terminated, _ = step_result
+            rollout_done = terminated or (steps >= max_length)
 
         # record result of taking that action
         obs.append(ob)
@@ -57,6 +145,8 @@ def sample_trajectory(
         # end the rollout if the rollout ended
         if rollout_done:
             break
+            
+        steps += 1
 
     return {
         "observation": np.array(obs, dtype=np.float32),
@@ -66,7 +156,6 @@ def sample_trajectory(
         "next_observation": np.array(next_obs, dtype=np.float32),
         "terminal": np.array(terminals, dtype=np.float32),
     }
-
 
 def sample_trajectories(
     env: gym.Env,

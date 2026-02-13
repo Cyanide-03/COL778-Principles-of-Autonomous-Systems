@@ -19,7 +19,7 @@ configs = {
                 "size":64,
                 "lr":1e-3
             },
-            "num_iteration": 250,
+            "num_iteration": 1,
             "episode_len": 1000
     },
     
@@ -27,16 +27,16 @@ configs = {
     'Ant-v4': {
 
               "hyperparameters": {
-                'batch_size': 512,
-                "num_iteration":500,
-                "max_length":1000,
+                'batch_size': 32,
+                "num_iteration":250,
+                "max_length":500,
                 "num_trajs":10,
-                "n_layers":2,
+                "n_layers":5,
                 "size":64,
                 "lr":1e-3
             },
-            "num_iteration": 500,
-            "episode_len": 1000
+            "num_iteration": 5,
+            "episode_len": 500
 
     }
 

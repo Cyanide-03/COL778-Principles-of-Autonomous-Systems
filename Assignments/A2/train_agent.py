@@ -11,8 +11,11 @@ from   utils.logger import Logger
 
 def setup_agent(args, configs):
     global env, agent
-    
-    env = gym.make(args.env_name,render_mode=None)
+
+    # render_mode = "rgb_array" if args.video_log_freq != -1 else None # !!!!
+
+    # env = gym.make(args.env_name,render_mode=render_mode) # ! removed this for fast rendering
+    env = gym.make(args.env_name, render_mode=None)
     env.action_space.seed()
     env.reset()
     discrete = isinstance(env.action_space, gym.spaces.Discrete)
@@ -24,7 +27,7 @@ def setup_agent(args, configs):
     return
 
 def train_agent(args, configs):
-    logger     = Logger(args.logdir)
+    logger= Logger(args.logdir)
     max_ep_len = configs.get("episode_len", None) or env.spec.max_episode_steps
     # set random seeds
     
@@ -43,7 +46,7 @@ def train_agent(args, configs):
         
         #train one iteration of the agent and return the loss and the training trajectory
         train_info = agent.train_iteration(env, envsteps_so_far = total_envsteps, render=False, itr_num = itr)
-
+        print(f"train complete")
         total_envsteps += train_info['current_train_envsteps']
         
         if itr % args.scalar_log_freq == 0:
@@ -75,10 +78,26 @@ def train_agent(args, configs):
 
         if args.video_log_freq != -1 and itr % args.video_log_freq == 0:
             print("\nCollecting video rollouts...")
-            eval_video_trajs = utils.sample_n_trajectories(
-                env, agent.get_action, args.n_vids_per_log, max_ep_len, render=True
-            )
+            
+            # 1. Create a temporary environment for video only
+            video_env = gym.make(args.env_name, render_mode='rgb_array')
+            video_env.reset() 
 
+            # 2. IMPORTANT: Pass 'video_env' here, NOT 'env'
+            eval_video_trajs = utils.sample_n_trajectories(
+                video_env, agent.get_action, args.n_vids_per_log, max_ep_len, render=True
+            )
+            
+            # DEBUG: Check if we got video data
+            print(f"Number of trajectories collected: {len(eval_video_trajs)}")
+            for i, traj in enumerate(eval_video_trajs):
+                print(f"Traj {i}: image_obs shape = {traj['image_obs'].shape}")
+            
+            # 3. Clean up
+            video_env.close()
+
+            print(f"fps: {fps}")
+            print(f"Logging videos to {args.logdir}")
             logger.log_trajs_as_videos(
                 eval_video_trajs,
                 itr,
@@ -86,6 +105,7 @@ def train_agent(args, configs):
                 max_videos_to_save=args.n_vids_per_log,
                 video_title="eval_rollouts",
             )
+            print("Video logging complete!")
 
 
 
@@ -121,8 +141,9 @@ def main():
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-
+    print(f"setting up the agent")
     setup_agent(args, configs)
+    print(f"training the agent")
     train_agent(args, configs)
 
 

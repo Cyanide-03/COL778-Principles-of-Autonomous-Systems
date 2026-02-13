@@ -106,13 +106,15 @@ class ImitationAgent(BaseAgent):
         num_updates=10 # ! asked on piazza
 
         # first we will get some data to train our neural network
-        # here data will be trajectories/episodes
-        # ! we might have to use policy blending here befroe sampling trajectories
+        # here data will be trajectories/episodes 
+        # ! we might have to use policy blending here before sampling trajectories
         trajs,envstep_this_batch=sample_trajectories(env,self.expert_policy,num_trajs*max_episode_length,max_episode_length,render)
         self.replay_buffer.add_rollouts(trajs) # we will add these trajs into replay buffer to sample from them later
         for i in range(num_updates):
             s_a_pairs=self.replay_buffer.sample_batch(batch_size,required=['obs','acs'])
-            loss=self.update(s_a_pairs['obs'],s_a_pairs['acs'])
+            obs=ptu.from_numpy(s_a_pairs['obs'])
+            acs=ptu.from_numpy(s_a_pairs['acs'])
+            loss=self.update(obs,acs)
             total_loss.append(loss)
 
         return {
