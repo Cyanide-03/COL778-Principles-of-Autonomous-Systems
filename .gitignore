@@ -2,3 +2,6 @@ Assignments/venv
 Assignments/Miniconda3-latest-Linux-x86_64.sh
 __pycache__/
 Assignments/data/
+Assignments/A2/report*
+Assignments/A2/best_models/*
+

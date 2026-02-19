@@ -73,8 +73,6 @@ def train_agent(args, configs):
                 logger.log_scalar(value, key, itr)
             print("Done logging...\n\n")
 
-            logger.flush()
-
 
         if args.video_log_freq != -1 and itr % args.video_log_freq == 0:
             print("\nCollecting video rollouts...")
@@ -106,6 +104,8 @@ def train_agent(args, configs):
                 video_title="eval_rollouts",
             )
             print("Video logging complete!")
+
+        logger.flush()
 
 
 
