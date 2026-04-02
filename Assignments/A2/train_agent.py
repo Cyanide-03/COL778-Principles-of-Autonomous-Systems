@@ -11,10 +11,7 @@ from   utils.logger import Logger
 
 def setup_agent(args, configs):
     global env, agent
-
-    # render_mode = "rgb_array" if args.video_log_freq != -1 else None # !!!!
-
-    # env = gym.make(args.env_name,render_mode=render_mode) # ! removed this for fast rendering
+    
     env = gym.make(args.env_name, render_mode=None)
     env.action_space.seed()
     env.reset()
