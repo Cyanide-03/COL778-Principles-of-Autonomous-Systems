@@ -8,7 +8,6 @@
 
   (:goal (and
         (open fridge)
-        (robotat fridge_l)
     )
   )
 

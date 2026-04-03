@@ -16,13 +16,4 @@
       :precondition (and (robotat ?l) (not (open ?d)))
       :effect (open ?d)
     )
-
-    (:action move
-      :parameters (?from ?to)
-      :precondition (robotat ?from)
-      :effect (and
-        (not (robotat ?from))
-        (robotat ?to)
-      )
-    )
 )
