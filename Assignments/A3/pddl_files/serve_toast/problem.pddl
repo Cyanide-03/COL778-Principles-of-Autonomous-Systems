@@ -7,19 +7,24 @@
 
     ; Configurations
     (handempty)
-    (not (open fridge))
-    (not (switchedon toaster))
 
     ; Objects location
     (robotat default_l)
-    (on plate dining_table)
-    (on knife counter_1)
+
     (in bread fridge)
-    (at toaster counter_1_l)
+    (on knife counter_1)
+    (on toaster counter_1)
+    (on plate dining_table)
+    
     (at fridge fridge_l)
-    (at dining_table dining_table_l)
     (at counter_1 counter_1_l)
+    (at dining_table dining_table_l)
     (at counter_2 counter_2_l)
+
+    (at bread fridge_l)
+    (at knife counter_1_l)
+    (at toaster counter_1_l)
+    (at plate dining_table_l)
   )
 
   (:goal
