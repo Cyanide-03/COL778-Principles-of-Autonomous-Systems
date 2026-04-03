@@ -3,11 +3,12 @@
   (:domain openFridge)
 
   (:init
-    (robotat fridge_l)    
+    (robotat default_l)    
   )
 
   (:goal (and
         (open fridge)
+        (robotat fridge_l)
     )
   )
 

@@ -25,7 +25,6 @@ class PlanExecutor:
         self.action_no = 0
         self.action_metadata_keys = ["lastAction", "lastActionSuccess", "errorMessage", "actionReturn"]
         
-    
     def init_env(self):
         self.controller = Controller()
         self.controller.reset(
@@ -64,6 +63,7 @@ class PlanExecutor:
             rotation=dict(x=90, y=0, z=0),
             fieldOfView=120
         )
+
     def agent_state(self):
         """Return the current agent metadata with an extra 'isHolding' field."""
         event = self.controller.last_event
@@ -123,7 +123,6 @@ class PlanExecutor:
             raise ValueError(f'Unknown location name {location_name}')
         location = self.task_context['locations'][location_name]
         return location['position'], location['rotation']
-
 
     def pick(self, objectName, containerName, location):
         objectId = self.getObjectByName(objectName)
