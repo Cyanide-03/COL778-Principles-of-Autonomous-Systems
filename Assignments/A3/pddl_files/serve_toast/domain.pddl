@@ -73,6 +73,7 @@
         (not (sliced ?o))
         (not (toasted ?o))
         (on ?o counter_1)
+        (at ?o ?l)
         (= ?l counter_1_l)
       )
       :effect (sliced ?o)

@@ -69,7 +69,7 @@
         )
 
         ;; this is when device=toaster, egg in pan, pan on stoveburner then cook the egg
-        (when (and (= ?d stoveburner) (in egg pan) (on pan stoveburner))
+        (when (and (= ?d stoveburner) (in egg pan) (on pan stoveburner) (sliced egg))
           (cooked egg)
         )
       )
@@ -82,6 +82,7 @@
         (holding knife)
         (not (handempty))
         (not (sliced ?o))
+        (at ?o ?l)
         (or 
           (and 
             (= ?o bread)
@@ -92,7 +93,7 @@
           (and
             (= ?o egg)
             (not (cooked ?o))
-            (on ?o counter_2)
+            (or (on ?o counter_2) (on ?o pan))
             (= ?l counter_2_l)
           )
         )
@@ -110,7 +111,7 @@
         (at ?o ?l)
         (at ?c ?l)
         (or (not (= ?c fridge)) (open ?c))
-
+      
       )
       :effect (and
         (holding ?o)
