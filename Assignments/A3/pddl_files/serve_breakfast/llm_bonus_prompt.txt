@@ -1,0 +1,20 @@
+You are an expert robotic task planner. Your task is to generate a very efficient, minimal plan to achieve the exact goal state defined in problem.pddl, specified action templates and objects from domain.pddl.
+
+Planning Heuristics for Efficiency (Shortest Plan Length):
+1. Batch by Location: Minimize `move` actions. Before leaving a location, execute every possible `pick`, `put`, `slice`, or `turn_on` action required for that area. 
+2. Tool Management: Remember that once you `pick` an item, you are `holding` it. You can carry the knife with you to slice items at other locations to save cost.
+
+Step-by-Step Chain of Thought Requirement:
+Before generating the final plan, you must use a scratchpad block to simulate the robot's state. In this scratchpad:
+- Track the robot's current location.
+- Track what the robot is currently holding (or handempty).
+- Map the most efficient route (e.g., Fridge->Counter 2->Counter 1->Dining Table).
+
+Output Rules:
+1. Write your reasoning inside a scratchpad block.
+2. After the scratchpad, output only the exact PDDL plan.
+3. Every line in the final plan must be a strictly valid action from the domain.
+4. Return only a llm_base_plan.pddl file, where each line contains a single action in parentheses.
+5. Do not include any explanations or reasoning — return only the llm_base_plan.pddl.
+
+Plan:
